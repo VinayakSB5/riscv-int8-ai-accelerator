@@ -1,4 +1,4 @@
-# ⚡ RISC-V INT8 AI Accelerator
+# RISC-V INT8 AI Accelerator
 
 A 32-bit RISC-V processor core (RV32I subset) integrated with a dedicated hardware **INT8 Multiply-Accumulate (MAC)** accelerator for edge AI inference.
 
@@ -7,7 +7,7 @@ A 32-bit RISC-V processor core (RV32I subset) integrated with a dedicated hardwa
 
 ---
 
-## 🏗️ Hardware Architecture & Verification
+##  Hardware Architecture & Verification
 
 ### 1. Full Top-Level Core Execution (`riscv_top.v`)
 Executes instructions end-to-end, showing register writeback for both standard arithmetic and custom MAC instructions.
@@ -33,7 +33,7 @@ Verifies immediate sign extension, 32-bit ALU operations, and zero detection.
 
 ---
 
-## 🚀 How to Run Simulations
+## How to Run Simulations
 
 ```powershell
 # Top-Level Core Simulation
