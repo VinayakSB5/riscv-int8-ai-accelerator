@@ -1,0 +1,47 @@
+name: RISC-V Core Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  simulate:
+    name: RTL Simulation & Self-Checking Testbench
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Toolchain (Icarus Verilog & Verilator)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog verilator
+
+      - name: Compile Full Core & MAC Netlist
+        run: |
+          mkdir -p build
+          iverilog -g2012 -Wall \
+            -I src \
+            -o build/riscv_sim.vvp \
+            src/*.v \
+            test/riscv_tb.v
+
+      - name: Run Simulation
+        run: |
+          vvp build/riscv_sim.vvp | tee simulation.log
+          # Check for explicit failure keywords in the log
+          if grep -q -E "FAIL|ERROR|FATAL" simulation.log; then
+            echo "Simulation encountered functional errors."
+            exit 1
+          fi
+
+      - name: Upload Verification Logs as Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-log
+          path: simulation.log
