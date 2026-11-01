@@ -16,26 +16,33 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Toolchain (Icarus Verilog & Verilator)
+      - name: List Repository Files (Debug)
+        run: |
+          echo "=== Files in repository ==="
+          find . -maxdepth 3 -not -path '*/.*'
+
+      - name: Install Toolchain (Icarus Verilog)
         run: |
           sudo apt-get update
-          sudo apt-get install -y iverilog verilator
+          sudo apt-get install -y iverilog
 
-      - name: Compile Full Core & MAC Netlist
+      - name: Compile and Run Simulation
         run: |
           mkdir -p build
-          iverilog -g2012 -Wall \
-            -I src \
-            -o build/riscv_sim.vvp \
-            src/*.v \
-            test/riscv_tb.v
-
-      - name: Run Simulation
-        run: |
+          # Find all verilog files in the repository automatically
+          VERILOG_FILES=$(find . -name "*.v" -not -path "./build/*")
+          echo "Found Verilog source files:"
+          echo "$VERILOG_FILES"
+          
+          # Compile with iverilog
+          iverilog -g2012 -o build/riscv_sim.vvp $VERILOG_FILES
+          
+          # Execute the simulation binary
           vvp build/riscv_sim.vvp | tee simulation.log
-          # Check for explicit failure keywords in the log
+          
+          # Fail step if explicit errors or fatals are raised
           if grep -q -E "FAIL|ERROR|FATAL" simulation.log; then
-            echo "Simulation encountered functional errors."
+            echo "Simulation failed functional checks."
             exit 1
           fi
 
